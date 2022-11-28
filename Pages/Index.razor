@@ -1,0 +1,72 @@
+﻿@page "/"
+
+@using Azure.IoT.ModelsRepository;
+@using Azure;
+
+<PageTitle>Index</PageTitle>
+
+<h1>Try accessing Microsoft and Custom IoT Repository</h1>
+
+<button @onclick="OnMicrosoftRepository">GetFromMicrosoftRepository</button>
+<br/><br/>
+<button @onclick="OnRaysRepository">GetFromRaysAppsRepository</button>
+<br/><br/>
+<h4>@micorosoftRepoStatus</h4>
+<h4>@raysappsRepoStatus</h4>
+
+<h1 style="color:red">@processing</h1>
+@code
+{
+    private  string?  micorosoftRepoStatus;
+    private  string? raysappsRepoStatus;
+    private string? processing = string.Empty;
+    private ModelsRepositoryClient? microsoftRepoClient;
+
+    private ModelsRepositoryClient? raysRepoClient;
+
+
+
+    protected override async  Task OnInitializedAsync()
+    {
+
+        ModelsRepositoryClientOptions MicrosoftcustomClientOptions = new();
+        MicrosoftcustomClientOptions.RepositoryMetadata.IsMetadataProcessingEnabled = false;
+        microsoftRepoClient =   new ModelsRepositoryClient(new Uri("https://devicemodels.azure.com"));
+
+
+        ModelsRepositoryClientOptions RayscustomClientOptions = new();
+        RayscustomClientOptions.RepositoryMetadata.IsMetadataProcessingEnabled = false;
+        raysRepoClient =  new ModelsRepositoryClient(new Uri("https://raysapps.github.io/DeviceModels"));
+
+        await base.OnInitializedAsync();
+    }
+    public async Task OnMicrosoftRepository()
+    {
+
+        raysappsRepoStatus = string.Empty;
+        processing = "Processing....";
+        if (microsoftRepoClient is not null)
+        {
+            var result = await microsoftRepoClient.GetModelAsync("dtmi:com:example:TemperatureController;1");
+            micorosoftRepoStatus = System.Text.Json.JsonSerializer.Serialize(result.Content); 
+        }
+      
+
+    }
+
+
+    public async Task OnRaysRepository()
+    {
+      
+            micorosoftRepoStatus = string.Empty;
+            processing = "Processing....";
+            if (raysRepoClient is not null)
+            {
+                var result = await raysRepoClient.GetModelAsync("dtmi:com:raysapps:mxchipapp:mxchipapp;1");
+                raysappsRepoStatus = System.Text.Json.JsonSerializer.Serialize(result.Content);
+            }
+        processing = string.Empty;
+        
+  }
+  
+}
